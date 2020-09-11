@@ -77,5 +77,5 @@ barplot(diff_mean_flu_ed,names.arg=c('Never attended school or only kindergarten
 technical school)','College 4 years or more (College graduate)','Refused'),horiz=TRUE, cex.names=0.8)
 title('Perecnt Difference in Group Size between \nVaccinated and NonVaccinated Participants', adj=0)
 ```
-![Alt text](/images/EDA.png?raw=true "Optional Title")
+![Alt text](/images/EDA.PNG?raw=true "Optional Title")
 
