@@ -102,9 +102,9 @@ xp2$flushot6<-2
 xp <- rbind(xp1, xp2)
 bart_mod <- bart(x.train = xt, y.train = y, x.test = xp)
 ```
-###Here is a snippet from my paper on how BART works
+### Here is a snippet from my paper on how BART works
 
-##Bayesian Additive Regression Trees (BART) 
+## Bayesian Additive Regression Trees (BART) 
 
 To estimate the outcome, of whether or not a participant was sick or not sick the modeling method of Bayesian Additive Regression Trees was employed. This method uses a conditional distribution of the treatment either flu shot vaccination or no flu shot vaccination, and the covariates, with an additive error term attached to predict the Y response values. This conditional distribution is dependent on an ignorability assumption that assumes values of Y are orthogonal to values of treatments given individual values of covariates. 
 
