@@ -82,5 +82,25 @@ title('Perecnt Difference in Group Size between \nVaccinated and NonVaccinated P
 
 ## Modeling
 
+
+
+```
+flu_data_twang<-flu_sub_t$variables
+flu_sub_t$variables$health_outcome<-ifelse(flu_data_twang$physhlth>4&flu_data_twang$physhlth<31,1,0)
+
+
+flu_data_twang<-flu_data_twang[,c('flushot6','marital','x.race','educa','income2',"health_outcome")]
+flu_data_twang<-flu_data_twang[complete.cases(flu_data_twang),]
+
+y<-flu_data_twang$health_outcome
+xt<-flu_data_twang[,c('flushot6','marital','x.race','educa','income2')]
+xp1<-xp2<-flu_data_twang[flu_data_twang$flushot6==1,c('flushot6','marital','x.race','educa','income2')]
+xt<-as.data.frame(xt)
+
+
+xp2$flushot6<-2
+xp <- rbind(xp1, xp2)
+bart_mod <- bart(x.train = xt, y.train = y, x.test = xp)
+```
 ![Alt text](/images/bart.PNG?raw=true "Optional Title")
 
