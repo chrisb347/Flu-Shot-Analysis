@@ -102,7 +102,7 @@ xp2$flushot6<-2
 xp <- rbind(xp1, xp2)
 bart_mod <- bart(x.train = xt, y.train = y, x.test = xp)
 ```
-### Here is a snippet from my paper on how BART works
+Here is a snippet from my paper on how BART works
 
 ## Bayesian Additive Regression Trees (BART) 
 
