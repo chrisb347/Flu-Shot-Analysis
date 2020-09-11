@@ -4,7 +4,7 @@ This set of files belongs to a working paper I wrote with a professor while taki
 
 ![Alt text](/images/flu_survey_example.PNG?raw=true "Optional Title")
 
-## Study Design
+## Study Design & EDA
 
 After observing the survey question above, I wanted to create an observational study design that would allow me to test differences between populations of recipients of flu shot vaccinations and non recipients. The working hypthesis was that there would be differences when we looked across different income groups, races, education level, marital status, or race. The first obstacle was the outcome, the BRFSS provides flu shot data (whether or not someone received a flushot) but the survey does not provide whether or not the flushot actually worked. Data like this may be difficult to actually obtain without doing clinical studies, however it is possible to create a proxy of this outcome with some assumptions. The BRFSS does collect detailed information of contraction and existing diseases in the survey's particiants. The BRFSS asks participants if they have been ill in the past 30 days, and this binary variable was the variable of interest. The survey was filtered to remove participants who had an chronic illnesses, in addition a filter was applied to only accept responses within the CDC defined flu season time period. Below code is written that shows the percent difference between groups that were administered flu shots, and were not to see if there were differences by any of the demographic categories. 
 
@@ -78,4 +78,9 @@ technical school)','College 4 years or more (College graduate)','Refused'),horiz
 title('Perecnt Difference in Group Size between \nVaccinated and NonVaccinated Participants', adj=0)
 ```
 ![Alt text](/images/EDA.PNG?raw=true "Optional Title")
+
+
+## Modeling
+
+![Alt text](/images/bart.PNG?raw=true "Optional Title")
 
