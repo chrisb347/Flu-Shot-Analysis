@@ -102,5 +102,13 @@ xp2$flushot6<-2
 xp <- rbind(xp1, xp2)
 bart_mod <- bart(x.train = xt, y.train = y, x.test = xp)
 ```
+Here is a snippet from my paper on how BART works
+
+Bayesian Additive Regression Trees (BART) 
+
+To estimate the outcome, of whether or not a participant was sick or not sick the modeling method of Bayesian Additive Regression Trees was employed. This method uses a conditional distribution of the treatment either flu shot vaccination or no flu shot vaccination, and the covariates, with an additive error term attached to predict the Y response values. This conditional distribution is dependent on an ignorability assumption that assumes values of Y are orthogonal to values of treatments given individual values of covariates. 
+
+BART begins by separating treatment and nontreatment groups. Once this is done it uses the covariates to establish cut points which are represented by the different branches of the trees. Once the cut points are established a final stepwise function to fit the data for different values of covariates. Within BART there is a regularization parameter that helps control 1 variable from contributing too much to the fit when trees are constructed. This regularization parameter also ensures there are not too many nodes in the tree to fit the model. In order to find the model which has the best fit, BART uses a Monte Carlo Markov Chain to search through different tree parameters and variance to minimize the residual variance. Once a model is fit for an individual tree, this model explanatory power is subtracted from the initial y value. This model generates residuals and the next model is fit on the residual values only, treating these residual values as the y value. Once all of the sub trees have been fit,they are added up to give the yhat prediction value from BART. The idea is that weak learners do not perform on their own but adding them up together can provide accurate estimates. The individual tree contributions are not able to be realized by the model because the joint probability remains fixed at the initial tree calculations, however the tree structure is subject to change when each subsequent tree is calculated.  
+
 ![Alt text](/images/bart.PNG?raw=true "Optional Title")
 
