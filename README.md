@@ -86,6 +86,12 @@ title('Perecnt Difference in Group Size between \nVaccinated and NonVaccinated P
 
 ```
 
+###BART
+# install.packages('BART')
+ library(BART)
+library(MASS)
+library(BayesTree)
+###############################################################################################################################
 ##data processing
 flu_data_twang<-flu_sub_t$variables
 flu_sub_t$variables$health_outcome<-ifelse(flu_data_twang$physhlth>4&flu_data_twang$physhlth<31,1,0)
@@ -94,20 +100,85 @@ flu_sub_t$variables$health_outcome<-ifelse(flu_data_twang$physhlth>4&flu_data_tw
 flu_data_twang<-flu_data_twang[,c('flushot6','marital','x.race','educa','income2',"health_outcome")]
 flu_data_twang<-flu_data_twang[complete.cases(flu_data_twang),]
 
-##splitting data up to feed into bart model
 y<-flu_data_twang$health_outcome
 xt<-flu_data_twang[,c('flushot6','marital','x.race','educa','income2')]
 xp1<-xp2<-flu_data_twang[flu_data_twang$flushot6==1,c('flushot6','marital','x.race','educa','income2')]
 xt<-as.data.frame(xt)
 
-
+##ATE
 xp2$flushot6<-2
 xp <- rbind(xp1, xp2)
-
-
-##run Model & save results 
-
 bart_mod <- bart(x.train = xt, y.train = y, x.test = xp)
+#   xt<-unique(complete.cases(xt))
+# y<-unique(complete.cases(y))
+# xp<-unique(complete.cases(xp))
+
+
+y
+bart_mod$
+
+  
+bart_mod_off1 <- bart(x.train = xt, y.train = y, x.test = xp,binaryOffset = 1)
+bart_mod_off2 <- bart(x.train = xt, y.train = y, x.test = xp,binaryOffset = 2)
+#############
+# Fit BART ##
+#############
+##ATT
+# BART
+bart_mod <- bart(x.train = xt, y.train = y, x.test = xp)
+
+nt<-subset(flu_data_twang,flushot6==1)
+nt<-length(nt$health_outcome)
+
+att <- mean(bart_mod$yhat.test[1:nt]) - 
+  mean(bart_mod$yhat.test[(nt+1):(2*nt)])
+att
+
+#ndraws <- nrow(bart_mod$yhat.test)
+
+tmp <- apply(bart_mod$yhat.test[,1:nt] -
+               bart_mod$yhat.test[, (nt+1):(2*nt)], 1, mean)
+stdev <- sqrt(var(tmp)) 
+
+# Confidence interval for ATT
+c(att - 1.96*stdev, att + 1.96*stdev)
+
+############################################################################################################################
+##ATNT
+flu_data_twang<-flu_sub_t$variables
+flu_sub_t$variables$health_outcome<-ifelse(flu_data_twang$physhlth>4&flu_data_twang$physhlth<31,1,0)
+
+
+flu_data_twang<-flu_data_twang[,c('flushot6','marital','x.race','educa','income2',"health_outcome")]
+flu_data_twang<-flu_data_twang[complete.cases(flu_data_twang),]
+y<-flu_data_twang$health_outcome
+xt<-flu_data_twang[,c('flushot6','marital','x.race','educa','income2')]
+xp1<-xp2<-flu_data_twang[flu_data_twang$flushot6==2,c('flushot6','marital','x.race','educa','income2')]
+xt<-as.data.frame(xt)
+
+
+xp2$flushot6<-1
+xp <- rbind(xp1, xp2)
+bart_mod_ATNT <- bart(x.train = xt, y.train = y, x.test = xp)
+
+
+nt<-subset(flu_data_twang,flushot6==2)
+nt<-length(nt$health_outcome)
+
+att <- mean(bart_mod_ATNT$yhat.test[1:nt]) - 
+  mean(bart_mod_ATNT$yhat.test[(nt+1):(2*nt)])
+att
+
+
+
+tmp <- apply(bart_mod_ATNT$yhat.test[,1:nt] -
+               bart_mod_ATNT$yhat.test[, (nt+1):(2*nt)], 1, mean)
+stdev <- sqrt(var(tmp)) 
+
+# Confidence interval for ATT
+c(att - 1.96*stdev, att + 1.96*stdev)
+
+
 
 ```
 Here is a snippet from my paper on how BART works
@@ -122,6 +193,17 @@ BART begins by separating treatment and nontreatment groups. Once this is done i
 
 ## Results
 
+BART 
+
+The results that are output from BART include the train data predicted values and the test data predicted values for y. These values are calculated using a probit connection function because they are binary and this is the default function for BART when considering a binary outcome. Typically in medicine the group of interest is the experimental group or the treated group. Within this particular study, the treatment group is less interesting because there is fairly substantial belief in the medical community that flu shots are helpful preventative measures when attempting to lower a patient's chances of contracting the flu. Surprisingly the average treatment effect (ATE) is quite small, smaller than 0.01, between treated and non treated individuals in this study. This does not necessarily mean that flu shots do not work. With multiple covariates, they may have different treatment effects, exploring the average effect of treatment on the non-treated (ATNT), average treatment against the treatment (ATT) and the heterogeneity treatment effects (HTE) will give more insight into differences between covariates in this sample.  
+
+A potentially interesting method to view results is building the model, and constructing a holdout sample of the data, where the holdout dataset is two duplicate datasets of the observations that received either a treatment or no treatment stacked on top of each other. However the duplicate would have the opposite value assigned to the duplicate observations. This will allow the researcher to view the counterfactual prediction that the model would yield. 
+
+ In this study, the ATT is small, because giving participants no flu shot who did receive a flu shot’s health outcome could easily be explained by other factors. People who receive flu shots could practice healthier lifestyles in general and live in communities of others who also receive flu shots. This would drastically reduce their risk of contracting the flu. The ATNT is significantly more interesting, because this taxonomy will vaccinate participants that did not receive a vaccination. However this treatment effect was found to be small, less than 0.01.  
+
+The next window to view the ATNT effects through is the heterogeneity treatment effect. This will take the ATNT from the non vaccinated observations that were duplicated and  assigned a treatment, and subtract them from a non treatment. Then the individual differences are a participant level can be observed if they had or had not received a vaccination. All of the predicted values in this model were negative and in this probit model framework, a large absolute negative value is associated with a lower probability of sickness. For example if the no vaccination group is larger than the counterfactual, when the two values are subtracted from each other respectively a negative value will be obtained. A boxplot is a good tool for noting the differences between these differential values, and was used to identify any differences in distributions for covariates. For many covariates there is no discernible difference. The only difference that can be seen somewhat clearly is the race covariate. Below it can be seen that the boxplot for hispanic participants is higher than the others. Positive differences mean that counterfactual flu shot that was administered had a positive effect on health outcome. Another way to say this is that if a person who did not receive a flu shot, had actually received that flu shot they would have decreased their chances of contracting an illness. A potentially interesting suggestive finding of this study is that hispanic and black populations have a slightly positive skewed distribution. This means that these races may have benefitted from receiving a flu shot. The tree cut points help account for differences among the covariates, so these racial differences are independent of marital status, education level, and income. Potential sources of these differences could be racial biases that exist in the medical system or cultural characteristics that may influence less healthy lifestyles, or less vaccination.  These are all difficult population characteristics to collect data on, and these findings remain solely speculative. 
+
+![Alt text](/images/EDA.PNG?raw=true "Optional Title")
 
 
 
